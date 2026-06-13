@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+data/
+chroma_db/
+bm25_index/
+uploads/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Private notes
+INTERVIEW_PREP.md
+
+# Database
+*.db
+*.sqlite
+*.sqlite3

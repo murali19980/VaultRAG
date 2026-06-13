@@ -1,0 +1,1 @@
+// Optional proxy to FastAPI to avoid CORS
