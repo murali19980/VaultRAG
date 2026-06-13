@@ -88,7 +88,7 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
         t_retrieval = time.time() - t0
         
         t1 = time.time()
-        response = engine.response_synthesizer.synthesize(request.message, nodes)
+        response = engine._response_synthesizer.synthesize(request.message, nodes)
         t_synthesis = time.time() - t1
         
         t_total = time.time() - t0
@@ -98,9 +98,9 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
         last_query_metrics["synthesis_latency_sec"] = t_synthesis
         last_query_metrics["total_latency_sec"] = t_total
         last_query_metrics["timestamp"] = datetime.utcnow().isoformat()
-    except Exception:
+    except Exception as e:
         logger.exception("Query engine call failed")
-        raise HTTPException(status_code=500, detail="Failed to generate answer")
+        raise HTTPException(status_code=500, detail=f"Failed to generate answer. Error: {str(e)}")
 
     citations = extract_citations(response)
     citations_json = json.dumps(citations, default=str)

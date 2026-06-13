@@ -29,6 +29,11 @@ def load_documents(
                 for idx, page in enumerate(pdf.pages, 1):
                     # 1. Extract text
                     text = page.extract_text() or ""
+                    if len(text.strip()) < 200:
+                        from backend.utils.pdf_extractor import extract_page_ocr
+                        ocr_text = extract_page_ocr(pdf_path, idx)
+                        if ocr_text.strip():
+                            text = ocr_text
                     
                     # 2. Extract tables
                     tables = page.extract_tables()

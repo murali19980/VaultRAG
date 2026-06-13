@@ -45,6 +45,7 @@ class HybridRetriever(BaseRetriever):
 
     @lru_cache(maxsize=128)
     def _retrieve_cached(self, query_str: str) -> tuple:
+        import re
         logger.info(
             "Running uncached hybrid retrieve for query: '%s' (dense=%d, bm25=%d, alpha=%.2f)",
             query_str,
@@ -52,6 +53,13 @@ class HybridRetriever(BaseRetriever):
             self._bm25_top_k,
             self._alpha,
         )
+
+        file_filter = None
+        match = re.search(r'\[DOC:\s*(.*?)\]', query_str)
+        if match:
+            file_filter = match.group(1).strip()
+            query_str = re.sub(r'\[DOC:\s*(.*?)\]', '', query_str).strip()
+            logger.info("Filtering hybrid search by document: '%s'", file_filter)
 
         query_bundle = QueryBundle(query_str=query_str)
         index = VectorStoreIndex.from_vector_store(
@@ -61,9 +69,19 @@ class HybridRetriever(BaseRetriever):
             similarity_top_k=self._similarity_top_k
         )
         chroma_results: List[NodeWithScore] = chroma_retriever.retrieve(query_bundle)
+        if file_filter:
+            chroma_results = [
+                n for n in chroma_results 
+                if n.node.metadata.get("file_name") == file_filter
+            ]
         logger.debug("Chroma returned %d results", len(chroma_results))
 
         bm25_raw = self._bm25_index.search(query_str, top_k=self._bm25_top_k)
+        if file_filter:
+            bm25_raw = [
+                doc for doc in bm25_raw 
+                if doc.get("metadata", {}).get("file_name") == file_filter
+            ]
         logger.debug("BM25 returned %d results", len(bm25_raw))
 
         node_map: Dict[str, NodeWithScore] = {}
