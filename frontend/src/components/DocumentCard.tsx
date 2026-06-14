@@ -81,7 +81,7 @@ export default function DocumentCard({ fileName, onDelete }: DocumentCardProps) 
           </button>
           <button
             onClick={() => setShowConfirm(false)}
-            className="px-2 py-1 text-[10px] font-bold bg-gray-200 dark:bg-gray-700 hover:bg-gray-350 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-300 rounded-lg transition"
+            className="px-2 py-1 text-[10px] font-bold bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition"
           >
             Cancel
           </button>

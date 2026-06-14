@@ -28,3 +28,6 @@ INTERVIEW_PREP.md
 *.db
 *.sqlite
 *.sqlite3
+
+# Scratch directory
+scratch/

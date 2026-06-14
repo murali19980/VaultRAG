@@ -18,6 +18,7 @@ def run_ingestion(
     chunk_size: int = 1024,
     chunk_overlap: int = 200,
     input_files: list[str] = None,
+    folder: str = "Default",
 ) -> int:
     import glob
     import os
@@ -56,6 +57,10 @@ def run_ingestion(
     if not nodes:
         logger.warning("Chunking produced zero nodes")
         return 0
+
+    # Apply folder tag to metadata
+    for node in nodes:
+        node.metadata["folder"] = folder or "Default"
 
     logger.info("Created %d chunk(s)", len(nodes))
 

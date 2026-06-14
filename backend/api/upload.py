@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Form
 import os
 from backend.ingestion.indexer import run_ingestion
 from backend.utils.file_utils import allowed_file
@@ -8,7 +8,8 @@ router = APIRouter(prefix="/upload", tags=["upload"])
 @router.post("")
 async def upload_documents(
     background_tasks: BackgroundTasks,
-    files: list[UploadFile] = File(...)
+    files: list[UploadFile] = File(...),
+    folder: str = Form("Default"),
 ):
     """
     Accept multiple files, save them to a persistent uploads directory,
@@ -35,7 +36,7 @@ async def upload_documents(
         raise HTTPException(status_code=400, detail="No files uploaded")
 
     # Run ingestion in background to avoid blocking
-    background_tasks.add_task(run_ingestion, input_files=saved_paths)
+    background_tasks.add_task(run_ingestion, input_files=saved_paths, folder=folder)
     return {
         "message": f"Uploaded {len(saved_paths)} file(s). Ingestion started in background.",
         "files": saved_paths
