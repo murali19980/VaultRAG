@@ -10,7 +10,7 @@ interface DocumentCardProps {
   onPreview?: (fileName: string) => void;
 }
 
-export default function DocumentCard({ fileName, onDelete }: DocumentCardProps) {
+export default function DocumentCard({ fileName, onDelete, onPreview }: DocumentCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [metadata, setMetadata] = useState<{ size_bytes: number; upload_date: string } | null>(null);
