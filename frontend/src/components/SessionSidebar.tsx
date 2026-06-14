@@ -3,6 +3,7 @@ import { useSessions } from "@/hooks/useSessions";
 import { MessageSquare, Plus, Trash2, Database, X, FileText } from "lucide-react";
 import api from "@/lib/api";
 import FileUploader from "./FileUploader";
+import DocumentCard from "./DocumentCard";
 
 interface Props {
   currentSessionId: string | null;
@@ -148,28 +149,19 @@ function DocumentList({
     return () => clearInterval(interval);
   }, [pendingDocs, fetchDocs]);
 
-  const deleteDoc = async (name: string) => {
-    try {
-      await api.delete(`/documents/${encodeURIComponent(name)}`);
-      fetchDocs();
-    } catch (err) {
-      console.error("Failed to delete document", err);
-    }
-  };
-
   if (loading && docs.length === 0 && pendingDocs.length === 0) {
     return <div className="text-gray-600 text-xs italic">Loading database...</div>;
   }
 
   return (
-    <div className="space-y-1.5 max-h-40 overflow-y-auto text-xs scrollbar-thin">
+    <div className="space-y-2 max-h-56 overflow-y-auto text-xs scrollbar-thin">
       {/* Pending (Indexing) Documents */}
       {pendingDocs.map(p => (
-        <div key={`pending-${p}`} className="flex justify-between items-center bg-gray-900/60 p-1.5 rounded border border-blue-900/40 animate-pulse">
+        <div key={`pending-${p}`} className="flex justify-between items-center bg-gray-900 p-2 rounded border border-blue-900/40 animate-pulse">
           <span className="truncate text-blue-400 flex items-center gap-1.5 max-w-[85%]">
             <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping shrink-0" />
-            <span className="truncate" title={p}>{p}</span>
-            <span className="text-[10px] text-blue-500/70 italic shrink-0 font-medium">(indexing...)</span>
+            <span className="truncate text-[10px] font-semibold" title={p}>{p}</span>
+            <span className="text-[9px] text-blue-500/70 italic shrink-0 font-medium">(indexing...)</span>
           </span>
         </div>
       ))}
@@ -179,19 +171,7 @@ function DocumentList({
         <div className="text-gray-600 italic py-1">No documents indexed</div>
       ) : (
         docs.map(d => (
-          <div key={d} className="flex justify-between items-center bg-gray-900 p-1.5 rounded border border-gray-800/80 group">
-            <span className="truncate text-gray-400 flex items-center gap-1.5 max-w-[80%]">
-              <FileText size={10} className="text-gray-500 shrink-0" />
-              <span className="truncate" title={d}>{d}</span>
-            </span>
-            <button
-              onClick={() => deleteDoc(d)}
-              className="text-gray-600 hover:text-red-400 p-0.5 rounded transition-all"
-              title="Delete Document from Vault"
-            >
-              <X size={12} />
-            </button>
-          </div>
+          <DocumentCard key={d} fileName={d} onDelete={fetchDocs} />
         ))
       )}
     </div>

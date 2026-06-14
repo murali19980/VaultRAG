@@ -27,8 +27,9 @@ def health():
 @app.get("/health/detailed")
 def detailed_health():
     import subprocess
+    import httpx
     from backend.api.chat import last_query_metrics
-    from backend.config import LOCAL_LLM_MODEL, EMBEDDING_MODEL, USE_LOCAL_LLM
+    from backend.config import LOCAL_LLM_MODEL, EMBEDDING_MODEL, OLLAMA_BASE_URL
     
     vram = None
     try:
@@ -36,19 +37,34 @@ def detailed_health():
             ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
             encoding="utf-8"
         )
-        vram = f"{output.strip()} MiB"
+        vram = int(output.strip())
     except Exception:
         pass
+
+    ollama_status = "unreachable"
+    try:
+        r = httpx.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=1.0)
+        if r.status_code == 200:
+            ollama_status = "running"
+    except Exception:
+        pass
+
+    last_query = None
+    if last_query_metrics and last_query_metrics.get("query"):
+        last_query = {
+            "query": last_query_metrics["query"],
+            "retrieval_ms": last_query_metrics["retrieval_latency_sec"] * 1000,
+            "synthesis_ms": last_query_metrics["synthesis_latency_sec"] * 1000,
+            "total_ms": last_query_metrics["total_latency_sec"] * 1000,
+        }
          
     return {
         "status": "ok",
-        "configuration": {
-            "use_local_llm": USE_LOCAL_LLM,
-            "llm_model": LOCAL_LLM_MODEL,
-            "embedding_model": EMBEDDING_MODEL,
+        "models": {
+            "embedding": EMBEDDING_MODEL,
+            "chat": LOCAL_LLM_MODEL,
         },
-        "system_resources": {
-            "gpu_vram_used": vram,
-        },
-        "last_query_metrics": last_query_metrics,
+        "vram_usage_mb": vram,
+        "ollama_status": ollama_status,
+        "last_query_latency": last_query,
     }

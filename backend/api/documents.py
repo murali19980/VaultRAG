@@ -67,3 +67,25 @@ def delete_document(file_name: str):
             pass
     
     return {"message": f"Deleted {file_name} (removed {len(ids_to_delete)} chunks)"}
+
+@router.get("/{file_name:path}/metadata")
+def get_document_metadata(file_name: str):
+    """
+    Get file size and upload time (creation time) from the filesystem.
+    """
+    raw_path = os.path.join("data", "uploads", file_name)
+    if not os.path.exists(raw_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    
+    stat_info = os.stat(raw_path)
+    size_bytes = stat_info.st_size
+    creation_time = os.path.getctime(raw_path)
+    
+    from datetime import datetime
+    creation_date = datetime.fromtimestamp(creation_time).isoformat()
+    
+    return {
+        "file_name": file_name,
+        "size_bytes": size_bytes,
+        "upload_date": creation_date
+    }
