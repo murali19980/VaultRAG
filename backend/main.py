@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 from backend.api import upload, chat, sessions, documents
 from backend.database import engine
 from backend import models
@@ -14,6 +16,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+os.makedirs(os.path.join("data", "uploads"), exist_ok=True)
+app.mount("/static", StaticFiles(directory="data"), name="static")
 
 app.include_router(upload.router)
 app.include_router(chat.router)

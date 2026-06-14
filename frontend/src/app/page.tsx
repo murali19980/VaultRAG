@@ -9,10 +9,12 @@ import TypingIndicator from "@/components/TypingIndicator";
 import CitationBadge from "@/components/CitationBadge";
 import ApiStatusIndicator from "@/components/ApiStatusIndicator";
 import ThemeToggle from "@/components/ThemeToggle";
+import PDFViewer from "@/components/PDFViewer";
 import { Shield, Sparkles, Database, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [pdfViewer, setPdfViewer] = useState<{ file: string; page: number } | null>(null);
   const { sessions, createSession } = useSessions();
   const { messages, loading, sendMessage, loadMessages } = useChat(currentSessionId);
 
@@ -126,7 +128,7 @@ export default function Home() {
                     {msg.citations && msg.citations.length > 0 && (
                       <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-800 flex flex-wrap gap-2">
                         {msg.citations.map((c, i) => (
-                          <CitationBadge key={i} citation={c} />
+                          <CitationBadge key={i} citation={c} onViewPDF={(file, page) => setPdfViewer({ file, page })} />
                         ))}
                       </div>
                     )}
@@ -145,6 +147,14 @@ export default function Home() {
         {/* Input Bar */}
         <ChatInput onSend={sendMessage} disabled={loading || !currentSessionId} />
       </div>
+
+      {pdfViewer && (
+        <PDFViewer
+          filePath={`uploads/${pdfViewer.file}`}
+          pageNumber={pdfViewer.page}
+          onClose={() => setPdfViewer(null)}
+        />
+      )}
     </div>
   );
 }

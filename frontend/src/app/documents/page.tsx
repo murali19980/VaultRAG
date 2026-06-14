@@ -5,6 +5,7 @@ import Link from "next/link";
 import api from "@/lib/api";
 import { ArrowLeft, Upload, FolderPlus, FileText, Trash2, Edit2, Search, Folder, FolderOpen, Loader2 } from "lucide-react";
 import DocumentCard from "@/components/DocumentCard";
+import PDFViewer from "@/components/PDFViewer";
 
 interface DocumentMeta {
   file_name: string;
@@ -27,6 +28,7 @@ export default function DocumentsPage() {
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [renamingFile, setRenamingFile] = useState<string | null>(null);
   const [newFileName, setNewFileName] = useState("");
+  const [pdfViewer, setPdfViewer] = useState<{ file: string; page: number } | null>(null);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -245,7 +247,11 @@ export default function DocumentsPage() {
                   const meta = metadatas[doc];
                   return (
                     <div key={doc} className="relative group bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800/80 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-                      <DocumentCard fileName={doc} onDelete={fetchDocuments} />
+                      <DocumentCard 
+                        fileName={doc} 
+                        onDelete={fetchDocuments} 
+                        onPreview={(file) => setPdfViewer({ file, page: 1 })}
+                      />
                       
                       <div className="mt-3 pt-3 border-t border-slate-50 dark:border-gray-800 flex justify-between items-center text-xs">
                         <span className="text-[10px] bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-500 dark:text-slate-400 font-semibold">
@@ -301,6 +307,14 @@ export default function DocumentsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {pdfViewer && (
+        <PDFViewer
+          filePath={`uploads/${pdfViewer.file}`}
+          pageNumber={pdfViewer.page}
+          onClose={() => setPdfViewer(null)}
+        />
       )}
     </div>
   );

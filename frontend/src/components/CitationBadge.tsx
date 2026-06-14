@@ -8,16 +8,23 @@ interface Citation {
   text?: string;
 }
 
-export default function CitationBadge({ citation }: { citation: Citation }) {
+interface CitationBadgeProps {
+  citation: Citation;
+  onViewPDF: (fileName: string, pageNum: number) => void;
+}
+
+export default function CitationBadge({ citation, onViewPDF }: CitationBadgeProps) {
   const [show, setShow] = useState(false);
   const displayText = citation.snippet || citation.text || "No snippet available";
+  const pageNum = parseInt(citation.page, 10) || 1;
 
   return (
     <span className="relative inline-block">
       <span
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
-        className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-medium rounded-full px-2.5 py-0.5 cursor-pointer transition-colors"
+        onClick={() => onViewPDF(citation.file, pageNum)}
+        className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-xs font-medium rounded-full px-2.5 py-0.5 cursor-pointer transition-colors active:scale-95"
       >
         <FileText size={10} />
         {citation.file} (p.{citation.page})
